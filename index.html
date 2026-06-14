@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>تندحساب | بازی سریع ریاضی</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .glass-container {
+            max-width: 550px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            border-radius: 48px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.5s ease;
+            position: relative;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .music-toggle {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .header h1 {
+            background: linear-gradient(135deg, #fbbf24, #10b981);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 60px;
+            padding: 12px 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .stat-item {
+            color: white;
+            font-weight: bold;
+        }
+        .stat-value {
+            color: #fbbf24;
+            font-size: 1.3rem;
+            margin-right: 8px;
+            display: inline-block;
+            transition: 0.2s;
+        }
+        .stat-value.pulse {
+            animation: statPulse 0.3s ease;
+        }
+        @keyframes statPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); color: #10b981; }
+            100% { transform: scale(1); }
+        }
+        .level-buttons, .ops-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .level-btn, .ops-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .level-btn.active {
+            background: #10b981;
+            border-color: #10b981;
+            box-shadow: 0 0 15px #10b981;
+        }
+        .ops-btn.active {
+            background: #fbbf24;
+            border-color: #fbbf24;
+            color: #1a1a2e;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+        .question-card {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 40px;
+            padding: 35px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .question-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 25px;
+            direction: ltr;
+            animation: questionPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        @keyframes questionPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .timer-container {
+            margin-bottom: 20px;
+        }
+        .timer-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .timer-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #fbbf24, #ef4444);
+            transition: width 0.05s linear;
+            border-radius: 20px;
+        }
+        .timer-text {
+            color: white;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .option-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 60px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+        }
+        .option-btn.correct {
+            background: #10b981;
+            animation: correctPulse 0.5s ease;
+        }
+        .option-btn.wrong {
+            background: #ef4444;
+            animation: shake 0.3s ease;
+        }
+        @keyframes correctPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 #10b981; }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16,185,129,0.5); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        .restart-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 60px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        .restart-btn:active {
+            transform: scale(0.98);
+        }
+        .feedback {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 60px;
+            animation: fadeSlide 0.3s ease;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 500px) {
+            .question-text { font-size: 1.8rem; }
+            .option-btn { padding: 10px; font-size: 1rem; }
+            .stats { font-size: 0.75rem; }
+            .level-btn, .ops-btn { padding: 5px 12px; font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="glass-container">
+    <button class="music-toggle" id="musicToggleBtn">🎵</button>
+    <div class="header">
+        <h1><i class="bi bi-calculator-fill"></i> تندحساب</h1>
+    </div>
+
+    <div class="stats">
+        <div class="stat-item">🎯 امتیاز: <span class="stat-value" id="score">0</span></div>
+        <div class="stat-item">✅ درست: <span class="stat-value" id="correctCount">0</span></div>
+        <div class="stat-item">❌ غلط: <span class="stat-value" id="wrongCount">0</span></div>
+        <div class="stat-item">⭐ رکورد: <span class="stat-value" id="highScore">0</span></div>
+    </div>
+
+    <div class="level-buttons">
+        <div class="level-btn" data-level="easy">🍃 آسان</div>
+        <div class="level-btn active" data-level="medium">⚡ متوسط</div>
+        <div class="level-btn" data-level="hard">🔥 سخت</div>
+    </div>
+
+    <div class="ops-buttons">
+        <div class="ops-btn" data-ops="add">➕ جمع</div>
+        <div class="ops-btn" data-ops="sub">➖ تفریق</div>
+        <div class="ops-btn" data-ops="mul">✖️ ضرب</div>
+        <div class="ops-btn" data-ops="div">➗ تقسیم</div>
+        <div class="ops-btn" data-ops="power">🔢 توان</div>
+        <div class="ops-btn" data-ops="root">√ رادیکال</div>
+    </div>
+
+    <div class="question-card">
+        <div class="timer-container">
+            <div class="timer-bar">
+                <div class="timer-fill" id="timerFill"></div>
+            </div>
+            <div class="timer-text" id="timerText">⏱️ زمان باقی‌مانده</div>
+        </div>
+        <div class="question-text" id="question">5 + 3 = ?</div>
+        <div class="options" id="options"></div>
+    </div>
+
+    <button class="restart-btn" id="restartBtn">🔄 شروع مجدد</button>
+    <div class="feedback" id="feedback"></div>
+</div>
+
+<script>
+    // سطوح با زمان
+    const levels = {
+        easy: { time: 10 },
+        medium: { time: 8 },
+        hard: { time: 6 }
+    };
+
+    let currentLevel = 'medium';
+    let activeOps = {
+        add: true, sub: true, mul: false, div: false, power: false, root: false
+    };
+    let currentQuestion = null;
+    let currentAnswer = null;
+    let score = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let highScore = localStorage.getItem('tandhesab_highScore') || 0;
+    let timer = null;
+    let timeLeft = 0;
+    let canAnswer = true;
+    let waitingForNext = false;
+    let nextQuestionTimeout = null;
+
+    // موسیقی پس‌زمینه
+    let bgMusic = null;
+    let isMusicPlaying = false;
+    
+    function initMusic() {
+        if (!bgMusic) {
+            bgMusic = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+            bgMusic.loop = true;
+            bgMusic.volume = 0.3;
+        }
+    }
+    
+    function toggleMusic() {
+        if (!bgMusic) initMusic();
+        if (isMusicPlaying) {
+            bgMusic.pause();
+            isMusicPlaying = false;
+            document.getElementById('musicToggleBtn').innerHTML = '🔇';
+            document.getElementById('musicToggleBtn').style.background = 'rgba(255,0,0,0.3)';
+        } else {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            bgMusic.play().catch(e => console.log('Audio play failed:', e));
+            isMusicPlaying = true;
+            document.getElementById('musicToggleBtn').innerHTML = '🎵';
+            document.getElementById('musicToggleBtn').style.background = 'rgba(0,0,0,0.5)';
+        }
+    }
+    
+    document.getElementById('musicToggleBtn').addEventListener('click', toggleMusic);
+
+    // صداهای افکت
+    let audioCtx = null;
+    
+    function playSound(type) {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        if (type === 'correct') {
+            osc.frequency.value = 880;
+            gain.gain.value = 0.15;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'wrong') {
+            osc.frequency.value = 440;
+            gain.gain.value = 0.15;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+            osc.stop(audioCtx.currentTime + 0.4);
+        } else if (type === 'timeout') {
+            osc.frequency.value = 330;
+            gain.gain.value = 0.1;
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+    }
+
+    function animateStat(statId) {
+        const el = document.getElementById(statId);
+        el.classList.add('pulse');
+        setTimeout(() => el.classList.remove('pulse'), 300);
+    }
+
+    const scoreEl = document.getElementById('score');
+    const correctCountEl = document.getElementById('correctCount');
+    const wrongCountEl = document.getElementById('wrongCount');
+    const highScoreEl = document.getElementById('highScore');
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const timerFill = document.getElementById('timerFill');
+    const timerText = document.getElementById('timerText');
+    const feedbackEl = document.getElementById('feedback');
+    const restartBtn = document.getElementById('restartBtn');
+
+    highScoreEl.innerText = highScore;
+
+    function random(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function powerCalc() {
+        let base = random(2, currentLevel === 'hard' ? 8 : 5);
+        let exp = random(2, currentLevel === 'hard' ? 4 : 3);
+        let answer = Math.pow(base, exp);
+        return { question: `${base} ^ ${exp} = ?`, answer: answer };
+    }
+
+    function rootCalc() {
+        let num;
+        if (currentLevel === 'hard') {
+            let perfect = [4,9,16,25,36,49,64,81,100];
+            num = perfect[Math.floor(Math.random() * perfect.length)];
+        } else {
+            let perfect = [4,9,16,25,36,49,64];
+            num = perfect[Math.floor(Math.random() * perfect.length)];
+        }
+        let answer = Math.sqrt(num);
+        return { question: `√${num} = ?`, answer: answer };
+    }
+
+    function getActiveOpsList() {
+        let ops = [];
+        if (activeOps.add) ops.push('add');
+        if (activeOps.sub) ops.push('sub');
+        if (activeOps.mul) ops.push('mul');
+        if (activeOps.div) ops.push('div');
+        if (activeOps.power) ops.push('power');
+        if (activeOps.root) ops.push('root');
+        return ops;
+    }
+
+    function generateQuestion() {
+        const activeList = getActiveOpsList();
+        if (activeList.length === 0) {
+            return { question: '2 + 2 = ?', answer: 4 };
+        }
+        const selectedOp = activeList[Math.floor(Math.random() * activeList.length)];
+        
+        if (selectedOp === 'power') return powerCalc();
+        if (selectedOp === 'root') return rootCalc();
+        
+        let min = currentLevel === 'easy' ? 1 : (currentLevel === 'medium' ? 5 : 10);
+        let max = currentLevel === 'easy' ? 20 : (currentLevel === 'medium' ? 50 : 100);
+        let a = random(min, max);
+        let b = random(min, max);
+        let answer, question;
+        
+        if (selectedOp === 'add') {
+            answer = a + b;
+            question = `${a} + ${b} = ?`;
+        } else if (selectedOp === 'sub') {
+            if (a < b) [a, b] = [b, a];
+            answer = a - b;
+            question = `${a} - ${b} = ?`;
+        } else if (selectedOp === 'mul') {
+            let limit = currentLevel === 'hard' ? 15 : 10;
+            a = random(2, limit);
+            b = random(2, limit);
+            answer = a * b;
+            question = `${a} × ${b} = ?`;
+        } else if (selectedOp === 'div') {
+            b = random(2, 12);
+            answer = random(2, 10);
+            a = b * answer;
+            question = `${a} ÷ ${b} = ?`;
+        }
+        return { question, answer };
+    }
+
+    function generateOptions(correctAnswer) {
+        const options = [correctAnswer];
+        const range = currentLevel === 'hard' ? 20 : 10;
+        while (options.length < 4) {
+            let offset = random(-range, range);
+            let opt = correctAnswer + offset;
+            if (opt !== correctAnswer && opt > 0 && !options.includes(opt)) {
+                options.push(opt);
+            }
+        }
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+        return options;
+    }
+
+    function startTimer() {
+        if (timer) clearInterval(timer);
+        timeLeft = levels[currentLevel].time;
+        timerFill.style.width = '100%';
+        timerText.innerHTML = `⏱️ زمان باقی‌مانده: ${timeLeft} ثانیه`;
+        timerFill.style.background = 'linear-gradient(90deg, #10b981, #fbbf24, #ef4444)';
+        
+        timer = setInterval(() => {
+            if (!canAnswer || waitingForNext) return;
+            timeLeft--;
+            const percent = (timeLeft / levels[currentLevel].time) * 100;
+            timerFill.style.width = `${percent}%`;
+            timerText.innerHTML = `⏱️ زمان باقی‌مانده: ${timeLeft} ثانیه`;
+            
+            if (timeLeft <= 3) {
+                timerFill.style.background = '#ef4444';
+                timerText.style.color = '#ef4444';
+            } else if (timeLeft <= 6) {
+                timerFill.style.background = '#fbbf24';
+                timerText.style.color = '#fbbf24';
+            } else {
+                timerText.style.color = 'white';
+            }
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                if (canAnswer && !waitingForNext) {
+                    canAnswer = false;
+                    wrongCount++;
+                    updateStats();
+                    animateStat('wrongCount');
+                    playSound('timeout');
+                    feedbackEl.innerHTML = '⏰ زمان تمام شد! پاسخ صحیح: ' + currentAnswer;
+                    feedbackEl.style.background = 'rgba(239,68,68,0.3)';
+                    showCorrectAnswer();
+                    scheduleNextQuestion();
+                }
+            }
+        }, 1000);
+    }
+
+    function showCorrectAnswer() {
+        const btns = document.querySelectorAll('.option-btn');
+        btns.forEach(btn => {
+            if (parseInt(btn.dataset.value) === currentAnswer) {
+                btn.classList.add('correct');
+            }
+            btn.style.pointerEvents = 'none';
+        });
+    }
+
+    function scheduleNextQuestion() {
+        if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+        waitingForNext = true;
+        nextQuestionTimeout = setTimeout(() => {
+            loadNewQuestion();
+        }, 1000);
+    }
+
+    function loadNewQuestion() {
+        waitingForNext = false;
+        canAnswer = true;
+        feedbackEl.innerHTML = '🤔 پاسخ خود را انتخاب کن...';
+        feedbackEl.style.background = 'transparent';
+        if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+        
+        const q = generateQuestion();
+        currentQuestion = q.question;
+        currentAnswer = q.answer;
+        questionEl.style.animation = 'none';
+        questionEl.offsetHeight;
+        questionEl.style.animation = 'questionPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+        questionEl.innerText = currentQuestion;
+        
+        const options = generateOptions(currentAnswer);
+        optionsEl.innerHTML = options.map(opt => `
+            <div class="option-btn" data-value="${opt}">${opt}</div>
+        `).join('');
+        
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.style.pointerEvents = 'auto';
+            btn.classList.remove('correct', 'wrong');
+            btn.addEventListener('click', () => checkAnswer(parseInt(btn.dataset.value), btn));
+        });
+        
+        if (timer) clearInterval(timer);
+        startTimer();
+    }
+
+    function checkAnswer(selectedValue, btnElement) {
+        if (!canAnswer || waitingForNext) return;
+        
+        canAnswer = false;
+        if (timer) clearInterval(timer);
+        
+        const isCorrect = (selectedValue === currentAnswer);
+        
+        if (isCorrect) {
+            btnElement.classList.add('correct');
+            let points = currentLevel === 'hard' ? 15 : (currentLevel === 'medium' ? 10 : 5);
+            score += points;
+            correctCount++;
+            updateStats();
+            animateStat('score');
+            animateStat('correctCount');
+            playSound('correct');
+            feedbackEl.innerHTML = '🎉 درست! +' + points + ' امتیاز 🎉';
+            feedbackEl.style.background = 'rgba(16,185,129,0.3)';
+        } else {
+            btnElement.classList.add('wrong');
+            wrongCount++;
+            updateStats();
+            animateStat('wrongCount');
+            playSound('wrong');
+            feedbackEl.innerHTML = `❌ اشتباه! پاسخ صحیح: ${currentAnswer} ❌`;
+            feedbackEl.style.background = 'rgba(239,68,68,0.3)';
+            showCorrectAnswer();
+        }
+        
+        setTimeout(() => { feedbackEl.style.background = 'transparent'; }, 800);
+        scheduleNextQuestion();
+        
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.style.pointerEvents = 'none';
+        });
+    }
+
+    function updateStats() {
+        scoreEl.innerText = score;
+        correctCountEl.innerText = correctCount;
+        wrongCountEl.innerText = wrongCount;
+        if (score > highScore) {
+            highScore = score;
+            highScoreEl.innerText = highScore;
+            localStorage.setItem('tandhesab_highScore', highScore);
+            animateStat('highScore');
+        }
+    }
+
+    function restartGame() {
+        score = 0;
+        correctCount = 0;
+        wrongCount = 0;
+        updateStats();
+        if (timer) clearInterval(timer);
+        if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+        canAnswer = true;
+        waitingForNext = false;
+        feedbackEl.innerHTML = '🎮 بازی دوباره شروع شد! موفق باشی 🎮';
+        feedbackEl.style.background = 'rgba(251,191,36,0.2)';
+        setTimeout(() => { feedbackEl.style.background = 'transparent'; }, 1000);
+        loadNewQuestion();
+    }
+
+    function setLevel(level) {
+        currentLevel = level;
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.level === level);
+        });
+        restartGame();
+    }
+
+    function toggleOp(op) {
+        activeOps[op] = !activeOps[op];
+        const btn = document.querySelector(`.ops-btn[data-ops="${op}"]`);
+        if (activeOps[op]) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+        // اگه هیچ عملیاتی فعال نباشه، جمع رو پیش‌فرض فعال کن
+        if (getActiveOpsList().length === 0) {
+            activeOps.add = true;
+            document.querySelector('.ops-btn[data-ops="add"]').classList.add('active');
+        }
+        restartGame();
+    }
+
+    restartBtn.addEventListener('click', restartGame);
+    
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', () => setLevel(btn.dataset.level));
+    });
+    
+    document.querySelectorAll('.ops-btn').forEach(btn => {
+        const op = btn.dataset.ops;
+        if (op === 'add') activeOps.add = true;
+        else if (op === 'sub') activeOps.sub = true;
+        btn.addEventListener('click', () => toggleOp(op));
+    });
+
+    document.body.addEventListener('click', () => {
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }, { once: true });
+
+    initMusic();
+    loadNewQuestion();
+</script>
+</body>
+</html>
